@@ -417,9 +417,9 @@ footer a:hover { color:var(--accent); }
     </a>
   </div>
   <div class="nav-links">
-    <button class="nav-link" onclick="scrollTo('features')" data-i18n="nav_features">Features</button>
-    <button class="nav-link" onclick="scrollTo('install')" data-i18n="nav_install">Install</button>
-    <button class="nav-link" onclick="scrollTo('docs')" data-i18n="nav_docs">Docs</button>
+    <button class="nav-link" onclick="scrollToSection('features')" data-i18n="nav_features">Features</button>
+    <button class="nav-link" onclick="scrollToSection('install')" data-i18n="nav_install">Install</button>
+    <button class="nav-link" onclick="scrollToSection('docs')" data-i18n="nav_docs">Docs</button>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="lang-sw">
@@ -802,7 +802,7 @@ const T = {
     v4t:'Auto-start on boot', v4d:'Enable "Start with Windows" so your ports are always ready.',
     vid_label:'Video guides', vid_title:'Watch it in action', vid_sub:'Step-by-step video tutorials for setup and usage.',
     vid1t:'How to install VSPE & create virtual COM ports', vid1s:'Complete setup guide · ~5 min',
-    vid2t:'com0com — Install & configure null-modem pair', vid2s:'Alternative driver · ~8 min',
+    vid2t:'Aronium POS — Customer display & VFD setup', vid2s:'Step-by-step Aronium configuration guide',
     vid3t:'AroniumPOS Display Client — Full walkthrough', vid3s:'From install to first scan · Coming soon',
     vid3coming:'AroniumPOS Display Client full demo — coming soon',
     faq_label:'Documentation', faq_title:'Common questions', faq_sub:'Everything you need to know.',
@@ -851,7 +851,7 @@ const T = {
     v4t:'Démarrage automatique', v4d:'Activez "Démarrer avec Windows" pour que vos ports soient toujours prêts.',
     vid_label:'Tutoriels vidéo', vid_title:'Voir l\'app en action', vid_sub:'Tutoriels vidéo étape par étape.',
     vid1t:'Comment installer VSPE et créer des ports COM virtuels', vid1s:'Guide complet · ~5 min',
-    vid2t:'com0com — Installation et configuration', vid2s:'Pilote alternatif · ~8 min',
+    vid2t:'Aronium POS — Configuration de l\'affichage client VFD', vid2s:'Guide de configuration Aronium étape par étape',
     vid3t:'AroniumPOS Display Client — Démonstration complète', vid3s:'De l\'install au premier scan · Bientôt disponible',
     vid3coming:'Démo complète AroniumPOS Display Client — bientôt disponible',
     faq_label:'Documentation', faq_title:'Questions fréquentes', faq_sub:'Tout ce que vous devez savoir.',
@@ -900,7 +900,7 @@ const T = {
     v4t:'التشغيل التلقائي', v4d:'فعّل "البدء مع Windows" حتى تكون المنافذ جاهزة دائمًا.',
     vid_label:'دروس فيديو', vid_title:'شاهده في العمل', vid_sub:'دروس فيديو خطوة بخطوة للإعداد والاستخدام.',
     vid1t:'كيفية تثبيت VSPE وإنشاء منافذ COM افتراضية', vid1s:'دليل كامل · ~5 دقائق',
-    vid2t:'com0com — التثبيت والإعداد', vid2s:'برنامج تشغيل بديل · ~8 دقائق',
+    vid2t:'Aronium POS — إعداد شاشة العميل VFD', vid2s:'دليل إعداد Aronium خطوة بخطوة',
     vid3t:'AroniumPOS Display Client — جولة كاملة', vid3s:'من التثبيت حتى أول مسح · قريبًا',
     vid3coming:'عرض توضيحي كامل — قريبًا',
     faq_label:'التوثيق', faq_title:'الأسئلة الشائعة', faq_sub:'كل ما تحتاج معرفته.',
@@ -964,7 +964,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
 });
 
 // Smooth scroll
-function scrollTo(id) {
+function scrollToSection(id) {
   document.getElementById(id).scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
