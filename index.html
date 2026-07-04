@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AroniumPOS Display Client — Free customer-facing display for Aronium POS. Real-time order display on any screen or phone.">
+<title>AroniumPOS Display Client</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS — same as the app
+═══════════════════════════════════════════ */
+:root {
+  --bg:         #07090f;
+  --bg2:        #0c101a;
+  --bg3:        #111420;
+  --accent:     #e8a000;
+  --acc-hi:     #f5b429;
+  --acc-dim:    rgba(232,160,0,0.10);
+  --acc-glow:   rgba(232,160,0,0.22);
+  --green:      #22c55e;
+  --border:     rgba(232,160,0,0.12);
+  --border-hi:  rgba(232,160,0,0.35);
+  --text:       #f0ece2;
+  --text2:      #8a8fa8;
+  --text3:      #3f4460;
+  --font:       'Inter', system-ui, sans-serif;
+  --mono:       'JetBrains Mono', monospace;
+  --r:          14px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border-hi); border-radius:3px; }
+
+/* ── Grid BG ── */
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(232,160,0,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,160,0,.025) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 40px; height:64px;
+  background:rgba(7,9,15,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-brand { display:flex; align-items:center; gap:10px; }
+.nav-logo {
+  width:32px; height:32px;
+  background:linear-gradient(135deg,var(--accent),#8a5000);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:16px; box-shadow:0 0 14px var(--acc-glow);
+}
+.nav-name { font-size:14px; font-weight:700; color:var(--accent); letter-spacing:-.2px; }
+.nav-links { display:flex; align-items:center; gap:6px; }
+.nav-link {
+  padding:7px 14px; border-radius:8px;
+  font-size:13px; font-weight:500; color:var(--text2);
+  text-decoration:none; transition:all .2s; cursor:pointer;
+  background:none; border:none;
+}
+.nav-link:hover { color:var(--text); background:rgba(255,255,255,.05); }
+.nav-dl {
+  padding:8px 18px; border-radius:999px;
+  background:var(--accent); color:#160e00;
+  font-size:13px; font-weight:700; text-decoration:none;
+  transition:all .2s; display:flex; align-items:center; gap:6px;
+}
+.nav-dl:hover { background:var(--acc-hi); transform:translateY(-1px); box-shadow:0 4px 16px var(--acc-glow); }
+
+/* Lang switcher */
+.lang-sw { display:flex; align-items:center; gap:2px; margin-right:8px; }
+.lang-btn {
+  padding:5px 10px; border-radius:6px; border:none;
+  background:transparent; color:var(--text3);
+  font-size:11px; font-weight:700; font-family:var(--mono);
+  cursor:pointer; transition:all .2s; letter-spacing:.5px;
+}
+.lang-btn:hover { color:var(--text2); }
+.lang-btn.active { color:var(--accent); background:var(--acc-dim); }
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  position:relative; z-index:1;
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:120px 24px 80px;
+}
+.hero-badge {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:6px 14px; border-radius:999px;
+  border:1px solid var(--border-hi); background:var(--acc-dim);
+  font-size:11.5px; font-weight:600; color:var(--accent); letter-spacing:.5px;
+  margin-bottom:28px;
+}
+.hero-badge-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.hero h1 {
+  font-size:clamp(40px,7vw,80px); font-weight:900;
+  line-height:1.05; letter-spacing:-2px;
+  margin-bottom:24px;
+}
+.hero h1 span { color:var(--accent); }
+.hero-sub {
+  font-size:clamp(16px,2.5vw,20px); color:var(--text2);
+  max-width:580px; line-height:1.65; margin-bottom:40px;
+}
+.hero-btns { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:72px; }
+.btn-dl {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:15px 32px; border-radius:999px;
+  background:var(--accent); color:#160e00;
+  font-size:15px; font-weight:700; text-decoration:none;
+  transition:all .25s;
+  box-shadow:0 0 30px var(--acc-glow);
+}
+.btn-dl:hover { background:var(--acc-hi); transform:translateY(-2px); box-shadow:0 8px 32px var(--acc-glow); }
+.btn-gh {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:15px 32px; border-radius:999px;
+  border:1.5px solid var(--border-hi); color:var(--text2);
+  font-size:15px; font-weight:600; text-decoration:none;
+  transition:all .25s; background:transparent;
+}
+.btn-gh:hover { border-color:var(--accent); color:var(--accent); background:var(--acc-dim); }
+
+/* App preview mockup */
+.hero-preview {
+  width:100%; max-width:900px;
+  border-radius:18px; overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(232,160,0,.08);
+  background:var(--bg2);
+  position:relative;
+}
+.preview-bar {
+  height:40px; background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 16px; gap:8px;
+}
+.preview-dot { width:10px; height:10px; border-radius:50%; }
+.preview-screen {
+  display:grid; grid-template-columns:1fr 420px;
+  min-height:320px;
+}
+.preview-order {
+  padding:20px; border-right:1px solid var(--border);
+}
+.preview-order-title { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:2px; text-transform:uppercase; margin-bottom:14px; }
+.preview-item {
+  display:grid; grid-template-columns:50px 1fr auto;
+  padding:10px 0; border-bottom:1px solid rgba(255,255,255,.04);
+  gap:12px; align-items:center;
+}
+.preview-qty { font-family:var(--mono); font-size:13px; color:var(--accent); font-weight:700; }
+.preview-name { font-size:13px; color:var(--text); }
+.preview-price { font-family:var(--mono); font-size:13px; color:var(--text2); }
+.preview-total {
+  margin-top:16px; padding-top:16px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:baseline;
+}
+.preview-total-label { font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; }
+.preview-total-amt { font-family:var(--mono); font-size:22px; font-weight:700; color:var(--accent); }
+.preview-promo {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; padding:20px; background:linear-gradient(135deg,rgba(232,160,0,.06),rgba(232,160,0,.02));
+}
+.preview-promo-tag {
+  padding:4px 10px; border-radius:999px;
+  background:var(--accent); color:#160e00;
+  font-size:11px; font-weight:800; letter-spacing:1px;
+}
+.preview-promo-title { font-size:24px; font-weight:900; color:var(--text); letter-spacing:-1px; text-align:center; }
+.preview-promo-sub { font-size:12px; color:var(--text2); text-align:center; }
+
+/* ═══════════════════════════════════════════
+   FEATURES GRID
+═══════════════════════════════════════════ */
+.section { position:relative; z-index:1; padding:100px 24px; max-width:1100px; margin:0 auto; }
+.section-label { font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--accent); margin-bottom:12px; }
+.section-title { font-size:clamp(28px,4vw,44px); font-weight:800; letter-spacing:-1px; margin-bottom:16px; line-height:1.1; }
+.section-sub { font-size:16px; color:var(--text2); max-width:540px; line-height:1.65; margin-bottom:56px; }
+
+.features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+.feat-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; padding:24px;
+  transition:all .25s;
+  position:relative; overflow:hidden;
+}
+.feat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:0; transition:opacity .25s;
+}
+.feat-card:hover { border-color:var(--border-hi); transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.4); }
+.feat-card:hover::before { opacity:1; }
+.feat-icon { font-size:28px; margin-bottom:14px; }
+.feat-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.feat-desc { font-size:12.5px; color:var(--text2); line-height:1.6; }
+
+/* ═══════════════════════════════════════════
+   INSTALL STEPS
+═══════════════════════════════════════════ */
+.install-wrap { max-width:1100px; margin:0 auto; padding:100px 24px; position:relative; z-index:1; }
+.steps-container { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+
+.step-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:18px; padding:28px; position:relative; overflow:hidden;
+}
+.step-card::after {
+  content:attr(data-n);
+  position:absolute; right:20px; top:16px;
+  font-size:60px; font-weight:900; color:rgba(232,160,0,.05);
+  font-family:var(--mono); line-height:1; pointer-events:none;
+}
+.step-num {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--accent); color:#160e00;
+  font-size:13px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:16px; flex-shrink:0;
+  box-shadow:0 0 14px var(--acc-glow);
+}
+.step-title { font-size:16px; font-weight:700; margin-bottom:8px; }
+.step-desc { font-size:13px; color:var(--text2); line-height:1.65; margin-bottom:16px; }
+
+.step-tools { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.tool-card {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px; border-radius:12px;
+  border:1px solid var(--border); background:var(--bg3);
+  text-decoration:none; transition:all .2s;
+}
+.tool-card:hover { border-color:var(--border-hi); background:var(--acc-dim); }
+.tool-icon { font-size:20px; flex-shrink:0; }
+.tool-info { flex:1; }
+.tool-name { font-size:13px; font-weight:600; color:var(--text); }
+.tool-sub  { font-size:11px; color:var(--text3); margin-top:1px; }
+.tool-badge {
+  font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px;
+  background:var(--green); color:#fff; letter-spacing:.5px;
+}
+
+/* Code block */
+.code-block {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:10px; padding:14px 16px; margin-top:12px;
+  font-family:var(--mono); font-size:12px; color:var(--text2);
+  line-height:1.7; overflow-x:auto;
+}
+.code-block .hl { color:var(--accent); }
+.code-block .cm { color:var(--text3); }
+
+/* Aronium config visual */
+.config-visual {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:10px; padding:16px; margin-top:12px;
+  font-family:var(--mono); font-size:12px;
+}
+.config-row { display:flex; align-items:center; gap:10px; padding:5px 0; }
+.config-key { color:var(--text2); min-width:140px; }
+.config-val { color:var(--accent); font-weight:600; }
+.config-arrow { color:var(--text3); }
+
+/* ═══════════════════════════════════════════
+   VIDEO SECTION
+═══════════════════════════════════════════ */
+.videos-section { max-width:1100px; margin:0 auto; padding:80px 24px; position:relative; z-index:1; }
+.videos-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
+.video-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; overflow:hidden; transition:all .25s;
+}
+.video-card:hover { transform:translateY(-4px); box-shadow:0 16px 50px rgba(0,0,0,.5); border-color:var(--border-hi); }
+.video-thumb {
+  width:100%; background:var(--bg3);
+  display:block; position:relative; overflow:hidden;
+}
+.video-thumb-placeholder {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; padding:20px; text-align:center;
+}
+.play-btn {
+  width:52px; height:52px; border-radius:50%;
+  background:var(--accent); display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 20px var(--acc-glow);
+  font-size:18px; padding-left:3px;
+}
+.video-info { padding:16px 18px; }
+.video-title { font-size:13.5px; font-weight:700; margin-bottom:4px; }
+.video-sub   { font-size:11.5px; color:var(--text2); }
+
+/* ═══════════════════════════════════════════
+   DOCS / FAQ
+═══════════════════════════════════════════ */
+.docs-section { max-width:860px; margin:0 auto; padding:80px 24px; position:relative; z-index:1; }
+.faq-list { display:flex; flex-direction:column; gap:10px; }
+.faq-item {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; overflow:hidden;
+}
+.faq-q {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; cursor:pointer; font-size:14px; font-weight:600;
+  transition:background .2s; gap:12px;
+}
+.faq-q:hover { background:rgba(255,255,255,.03); }
+.faq-q-text { flex:1; }
+.faq-chevron { color:var(--accent); font-size:16px; transition:transform .25s; flex-shrink:0; }
+.faq-item.open .faq-chevron { transform:rotate(180deg); }
+.faq-a {
+  display:none; padding:0 20px 18px; font-size:13px; color:var(--text2); line-height:1.7;
+}
+.faq-item.open .faq-a { display:block; }
+
+/* ═══════════════════════════════════════════
+   CTA
+═══════════════════════════════════════════ */
+.cta-section {
+  position:relative; z-index:1; text-align:center;
+  padding:100px 24px; margin:0 auto; max-width:700px;
+}
+.cta-glow {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:500px; height:300px; border-radius:50%;
+  background:radial-gradient(ellipse,rgba(232,160,0,.12),transparent 70%);
+  pointer-events:none; z-index:0;
+}
+.cta-section > * { position:relative; z-index:1; }
+.cta-title { font-size:clamp(28px,5vw,48px); font-weight:900; letter-spacing:-1.5px; margin-bottom:16px; line-height:1.1; }
+.cta-sub { font-size:16px; color:var(--text2); margin-bottom:36px; }
+.version-badge {
+  display:inline-block; padding:5px 14px; border-radius:999px;
+  border:1px solid var(--border); color:var(--text3);
+  font-size:11px; font-family:var(--mono); margin-bottom:20px;
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  position:relative; z-index:1;
+  border-top:1px solid var(--border);
+  padding:32px 40px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  font-size:12px; color:var(--text3);
+}
+footer a { color:var(--text3); text-decoration:none; }
+footer a:hover { color:var(--accent); }
+
+/* ═══════════════════════════════════════════
+   DIVIDERS & UTILS
+═══════════════════════════════════════════ */
+.divider { border:none; border-top:1px solid var(--border); margin:0; }
+.badge-free {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 12px; border-radius:999px;
+  background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.25);
+  color:var(--green); font-size:11px; font-weight:700; letter-spacing:.5px;
+}
+.highlight { color:var(--accent); }
+
+/* Reveal animation */
+.reveal { opacity:0; transform:translateY(20px); transition:all .6s cubic-bezier(.4,0,.2,1); }
+.reveal.visible { opacity:1; transform:none; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width:768px) {
+  nav { padding:0 20px; }
+  .nav-links { display:none; }
+  .steps-container { grid-template-columns:1fr; }
+  .preview-screen { grid-template-columns:1fr; }
+  .preview-promo { display:none; }
+  footer { flex-direction:column; text-align:center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium" target="_blank" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <img src="logo.png" alt="AroniumPOS" style="width:32px;height:32px;border-radius:8px;box-shadow:0 0 14px rgba(232,160,0,0.3)">
+      <span class="nav-name">AroniumPOS Display</span>
+    </a>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link" onclick="scrollTo('features')" data-i18n="nav_features">Features</button>
+    <button class="nav-link" onclick="scrollTo('install')" data-i18n="nav_install">Install</button>
+    <button class="nav-link" onclick="scrollTo('docs')" data-i18n="nav_docs">Docs</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="lang-sw">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="ar">AR</button>
+    </div>
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="nav-dl" target="_blank">
+      ⬇ <span data-i18n="dl">Download</span>
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    <span data-i18n="badge">Free & Open Source · v1.1.5</span>
+  </div>
+  <h1 data-i18n="hero_h1">Your customers see<br><span>every item, live.</span></h1>
+  <p class="hero-sub" data-i18n="hero_sub">A free customer-facing display for Aronium POS. Every scan shows up instantly on a second screen, phone, or tablet — no setup for the customer.</p>
+  <div class="hero-btns">
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="btn-dl" target="_blank">
+      ⬇ <span data-i18n="dl_win">Download for Windows</span>
+    </a>
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium" class="btn-gh" target="_blank">
+      ⭐ <span data-i18n="view_gh">View on GitHub</span>
+    </a>
+  </div>
+
+  <!-- App mockup -->
+  <div class="hero-preview reveal">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ef4444"></div>
+      <div class="preview-dot" style="background:#f59e0b"></div>
+      <div class="preview-dot" style="background:#22c55e"></div>
+      <span style="margin-left:8px;font-size:11px;color:#3f4460;font-family:var(--mono)">AroniumPOS Display Client v1.1.5</span>
+    </div>
+    <div class="preview-screen">
+      <div class="preview-order">
+        <div class="preview-order-title">Your order · No. 28</div>
+        <div class="preview-item">
+          <span class="preview-qty">1×</span>
+          <span class="preview-name">Shawarma Poulet</span>
+          <span class="preview-price">45.00 MAD</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-qty">2×</span>
+          <span class="preview-name">Jus d'orange</span>
+          <span class="preview-price">30.00 MAD</span>
+        </div>
+        <div class="preview-item">
+          <span class="preview-qty">0.35 kg</span>
+          <span class="preview-name">Fromage (au poids)</span>
+          <span class="preview-price">24.50 MAD</span>
+        </div>
+        <div class="preview-total">
+          <span class="preview-total-label">Total</span>
+          <span class="preview-total-amt">99.50 MAD</span>
+        </div>
+      </div>
+      <div class="preview-promo">
+        <div class="preview-promo-tag">PROMO</div>
+        <div class="preview-promo-title">Weekend<br>Special 🔥</div>
+        <div class="preview-promo-sub">Drag any image or video<br>to display your ads here</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label" data-i18n="feat_label">What it does</div>
+  <h2 class="section-title" data-i18n="feat_title">Everything your customers need to see.</h2>
+  <p class="section-sub" data-i18n="feat_sub">Built specifically for Aronium POS. No bloat, no subscription, no catch.</p>
+  <div class="features-grid">
+    <div class="feat-card reveal">
+      <div class="feat-icon">🛒</div>
+      <div class="feat-title" data-i18n="f1t">Live order display</div>
+      <div class="feat-desc" data-i18n="f1d">Every scanned item appears instantly with quantity, unit price, and running total.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">📢</div>
+      <div class="feat-title" data-i18n="f2t">Promo display</div>
+      <div class="feat-desc" data-i18n="f2d">Drag & drop an image or video. Fullscreen between customers, side panel during orders.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">📱</div>
+      <div class="feat-title" data-i18n="f3t">Works on any phone</div>
+      <div class="feat-desc" data-i18n="f3d">Customer opens a link on their phone — no app needed. Works on Chrome, Safari, Edge.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">⚖️</div>
+      <div class="feat-title" data-i18n="f4t">Weight products</div>
+      <div class="feat-desc" data-i18n="f4d">0.350 kg × 89.90 → calculated automatically. No manual entry needed.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">🌐</div>
+      <div class="feat-title" data-i18n="f5t">3 languages</div>
+      <div class="feat-desc" data-i18n="f5d">English, Français, العربية. Switch in one click from the Config panel.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">💱</div>
+      <div class="feat-title" data-i18n="f6t">Auto currency</div>
+      <div class="feat-desc" data-i18n="f6d">Reads your Windows locale — MAD, EUR, USD, GBP and more, automatically.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">💳</div>
+      <div class="feat-title" data-i18n="f7t">Payment & change</div>
+      <div class="feat-desc" data-i18n="f7d">Amount paid and change are shown for 5 seconds at checkout, then cleared.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">🔄</div>
+      <div class="feat-title" data-i18n="f8t">Auto reconnect</div>
+      <div class="feat-desc" data-i18n="f8d">Disconnected COM port? The app reconnects automatically every 5 seconds.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- INSTALL -->
+<section class="install-wrap" id="install">
+  <div class="section-label" data-i18n="inst_label">Installation</div>
+  <h2 class="section-title" data-i18n="inst_title">Up and running in 4 steps.</h2>
+  <p class="section-sub" data-i18n="inst_sub">The app uses a virtual COM port pair to receive data from Aronium. Here's exactly how to set it up.</p>
+
+  <div class="steps-container">
+
+    <!-- Step 1 -->
+    <div class="step-card reveal" data-n="1">
+      <div class="step-num">1</div>
+      <div class="step-title" data-i18n="s1t">Download & install the app</div>
+      <div class="step-desc" data-i18n="s1d">Download the latest Windows installer and run it. No admin required — the app installs in your user folder.</div>
+      <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="tool-card" target="_blank" style="text-decoration:none">
+        <div class="tool-icon">📦</div>
+        <div class="tool-info">
+          <div class="tool-name">AroniumPOS-Display-Client-Setup.exe</div>
+          <div class="tool-sub">Windows 10 / 11 · x64</div>
+        </div>
+        <span class="tool-badge">FREE</span>
+      </a>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card reveal" data-n="2">
+      <div class="step-num">2</div>
+      <div class="step-title" data-i18n="s2t">Create a virtual COM port pair</div>
+      <div class="step-desc" data-i18n="s2d">The app needs two virtual COM ports linked together. Aronium sends data on one, the app reads from the other. Install one of these free tools:</div>
+      <div class="step-tools">
+        <a class="tool-card" href="https://www.eterlogic.com/Products.VSPE.html" target="_blank" rel="noopener">
+          <div class="tool-icon">🔌</div>
+          <div class="tool-info">
+            <div class="tool-name">VSPE — Virtual Serial Port Emulator</div>
+            <div class="tool-sub">by Eterlogic · Easiest to use · Recommended</div>
+          </div>
+          <span class="tool-badge" style="background:#3b82f6">⭐ EASY</span>
+        </a>
+        <a class="tool-card" href="https://com0com.sourceforge.net/" target="_blank" rel="noopener">
+          <div class="tool-icon">🔧</div>
+          <div class="tool-info">
+            <div class="tool-name">com0com — Null-modem emulator</div>
+            <div class="tool-sub">Open source · Advanced users</div>
+          </div>
+          <span class="tool-badge" style="background:var(--text3)">FREE</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card reveal" data-n="3">
+      <div class="step-num">3</div>
+      <div class="step-title" data-i18n="s3t">Configure Aronium POS</div>
+      <div class="step-desc" data-i18n="s3d">Tell Aronium to send customer display data to the first virtual port:</div>
+      <div class="config-visual">
+        <div class="config-row">
+          <span class="config-key">Settings</span>
+          <span class="config-arrow">→</span>
+          <span class="config-val">Devices</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Customer Display</span>
+          <span class="config-arrow">→</span>
+          <span class="config-val">Enable ✓</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">COM Port</span>
+          <span class="config-arrow">→</span>
+          <span class="config-val">COM20</span>
+        </div>
+      </div>
+      <div class="step-desc" style="margin-top:12px;margin-bottom:0" data-i18n="s3note">Use the left port of the pair you created. The app reads from the right port (e.g. COM21).</div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step-card reveal" data-n="4">
+      <div class="step-num">4</div>
+      <div class="step-title" data-i18n="s4t">Launch & configure the app</div>
+      <div class="step-desc" data-i18n="s4d">Launch AroniumPOS Display Client. The setup wizard will ask you to select your two COM ports. Choose the pair you created.</div>
+      <div class="code-block">
+        <span class="cm"># On phone/tablet — open browser and type:</span><br>
+        http://<span class="hl">YOUR-PC-IP</span>:3000<br>
+        <br>
+        <span class="cm"># Example:</span><br>
+        http://<span class="hl">192.168.1.5</span>:3000
+      </div>
+      <div class="step-desc" style="margin-top:10px;margin-bottom:0" data-i18n="s4note">The exact address is shown inside the app's Config panel (⚙️ top right).</div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- VSPE GUIDE -->
+<section class="section" id="vspe-guide">
+  <div class="section-label" data-i18n="vspe_label">Step-by-step guide</div>
+  <h2 class="section-title" data-i18n="vspe_title">How to set up VSPE</h2>
+  <p class="section-sub" data-i18n="vspe_sub">VSPE is the easiest way to create a virtual COM pair. Follow these steps.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+    <div class="feat-card reveal">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:#160e00;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">1</div>
+        <div class="feat-title" style="margin:0" data-i18n="v1t">Download & install VSPE</div>
+      </div>
+      <div class="feat-desc" data-i18n="v1d">Go to eterlogic.com, download VSPE and install it. Launch it as Administrator.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:#160e00;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">2</div>
+        <div class="feat-title" style="margin:0" data-i18n="v2t">Create a new device</div>
+      </div>
+      <div class="feat-desc" data-i18n="v2d">Click "Create new device" → choose "NullModem" → set Port A to COM20 and Port B to COM21.</div>
+    </div>
+    <div class="feat-card reveal">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:#160e00;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">3</div>
+        <div class="feat-title" style="margin:0" data-i18n="v3t">Start the pair</div>
+      </div>
+      <div class="feat-desc" data-i18n="v3d">Click Start. Both COM20 and COM21 will now appear in Windows Device Manager under Ports (COM & LPT).</div>
+    </div>
+    <div class="feat-card reveal">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:#160e00;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">4</div>
+        <div class="feat-title" style="margin:0" data-i18n="v4t">Auto-start on boot</div>
+      </div>
+      <div class="feat-desc" data-i18n="v4d">In VSPE settings, enable "Start with Windows" so your ports are always ready when the PC boots.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- VIDEOS -->
+<section class="videos-section" id="videos">
+  <div class="section-label" data-i18n="vid_label">Video guides</div>
+  <h2 class="section-title" data-i18n="vid_title">Watch it in action</h2>
+  <p class="section-sub" style="margin-bottom:36px" data-i18n="vid_sub">Step-by-step video tutorials for setup and usage.</p>
+  <div class="videos-grid" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))">
+
+    <!-- VSPE setup video -->
+    <div class="video-card reveal">
+      <div class="video-thumb" style="position:relative;padding:0;height:0;padding-top:56.25%;overflow:hidden">
+        <iframe
+          src="https://player.vimeo.com/video/1206956922?badge=0&autopause=0&player_id=0&app_id=58479"
+          frameborder="0"
+          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none"
+          title="VSPE CONFIG ARONIUM VFD">
+        </iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title" data-i18n="vid1t">VSPE — Virtual COM port configuration</div>
+        <div class="video-sub" data-i18n="vid1s">How to set up VSPE for AroniumPOS VFD display</div>
+      </div>
+    </div>
+
+    <!-- Aronium setup video -->
+    <div class="video-card reveal">
+      <div class="video-thumb" style="position:relative;padding:0;height:0;padding-top:75%;overflow:hidden">
+        <iframe
+          src="https://player.vimeo.com/video/1206956903?badge=0&autopause=0&player_id=0&app_id=58479"
+          frameborder="0"
+          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none"
+          title="Aronium Configuration">
+        </iframe>
+      </div>
+      <div class="video-info">
+        <div class="video-title" data-i18n="vid2t">Aronium POS — Customer display setup</div>
+        <div class="video-sub" data-i18n="vid2s">Configure Aronium to send data to the display</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DOCS / FAQ -->
+<section class="docs-section" id="docs">
+  <div class="section-label" data-i18n="faq_label">Documentation</div>
+  <h2 class="section-title" data-i18n="faq_title">Common questions</h2>
+  <p class="section-sub" style="margin-bottom:36px" data-i18n="faq_sub">Everything you need to know.</p>
+  <div class="faq-list" id="faqList"></div>
+</section>
+
+<hr class="divider">
+
+<!-- CTA -->
+<div style="position:relative;z-index:1">
+  <div class="cta-glow"></div>
+  <section class="cta-section">
+    <div class="version-badge">v1.1.5 · Windows 10/11</div>
+    <h2 class="cta-title" data-i18n="cta_title">Ready to show your<br><span class="highlight">customers the price?</span></h2>
+    <p class="cta-sub" data-i18n="cta_sub">Free forever. No subscription. No account required.</p>
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="btn-dl" target="_blank" style="display:inline-flex">
+      ⬇ <span data-i18n="dl_win">Download for Windows</span>
+    </a>
+    <div style="margin-top:16px">
+      <span class="badge-free">✓ <span data-i18n="free_forever">Free forever · MIT License</span></span>
+    </div>
+  </section>
+</div>
+
+<hr class="divider">
+
+<!-- FOOTER -->
+<footer>
+  <div style="display:flex;align-items:center;gap:10px">
+    <img src="logo.png" alt="logo" style="width:24px;height:24px;border-radius:6px">
+    <span>AroniumPOS Display Client</span>
+  </div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium" target="_blank">GitHub</a>
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases" target="_blank">Releases</a>
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/issues" target="_blank">Report a bug</a>
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/blob/main/LICENSE" target="_blank">MIT License</a>
+  </div>
+  <span>© 2025 Hamidlegardien</span>
+</footer>
+
+<!-- ══════════════════════════════════════════════
+     TRANSLATIONS
+══════════════════════════════════════════════ -->
+<script>
+const T = {
+  en: {
+    nav_features:'Features', nav_install:'Install', nav_docs:'Docs', dl:'Download',
+    badge:'Free & Open Source · v1.1.5',
+    hero_h1:'Your customers see<br><span>every item, live.</span>',
+    hero_sub:'A free customer-facing display for Aronium POS. Every scan shows up instantly on a second screen, phone, or tablet — no setup for the customer.',
+    dl_win:'Download for Windows', view_gh:'View on GitHub',
+    feat_label:'What it does', feat_title:'Everything your customers need to see.',
+    feat_sub:'Built specifically for Aronium POS. No bloat, no subscription, no catch.',
+    f1t:'Live order display', f1d:'Every scanned item appears instantly with quantity, unit price, and running total.',
+    f2t:'Promo display', f2d:'Drag & drop an image or video. Fullscreen between customers, side panel during orders.',
+    f3t:'Works on any phone', f3d:'Customer opens a link — no app needed. Works on Chrome, Safari, Edge.',
+    f4t:'Weight products', f4d:'0.350 kg × 89.90 → calculated automatically.',
+    f5t:'3 languages', f5d:'English, Français, العربية. Switch in one click from the Config panel.',
+    f6t:'Auto currency', f6d:'Reads your Windows locale — MAD, EUR, USD, GBP and more.',
+    f7t:'Payment & change', f7d:'Shown for 5 seconds at checkout, then cleared automatically.',
+    f8t:'Auto reconnect', f8d:'Disconnected COM port? The app reconnects automatically every 5 seconds.',
+    inst_label:'Installation', inst_title:'Up and running in 4 steps.',
+    inst_sub:'The app uses a virtual COM port pair to receive data from Aronium. Here\'s exactly how to set it up.',
+    s1t:'Download & install the app', s1d:'Download the latest Windows installer and run it.',
+    s2t:'Create a virtual COM port pair', s2d:'The app needs two virtual COM ports linked together. Install one of these free tools:',
+    s3t:'Configure Aronium POS', s3d:'Tell Aronium to send customer display data to the first virtual port:',
+    s3note:'Use the left port of the pair you created. The app reads from the right port (e.g. COM21).',
+    s4t:'Launch & configure the app', s4d:'Launch the app. The setup wizard will ask you to select your two COM ports.',
+    s4note:'The exact address is shown inside the app\'s Config panel (⚙️ top right).',
+    vspe_label:'Step-by-step guide', vspe_title:'How to set up VSPE', vspe_sub:'VSPE is the easiest way to create a virtual COM pair.',
+    v1t:'Download & install VSPE', v1d:'Go to eterlogic.com, download VSPE and install it. Launch as Administrator.',
+    v2t:'Create a new device', v2d:'Click "Create new device" → choose "NullModem" → set Port A to COM20, Port B to COM21.',
+    v3t:'Start the pair', v3d:'Click Start. COM20 and COM21 will appear in Device Manager.',
+    v4t:'Auto-start on boot', v4d:'Enable "Start with Windows" so your ports are always ready.',
+    vid_label:'Video guides', vid_title:'Watch it in action', vid_sub:'Step-by-step video tutorials for setup and usage.',
+    vid1t:'How to install VSPE & create virtual COM ports', vid1s:'Complete setup guide · ~5 min',
+    vid2t:'com0com — Install & configure null-modem pair', vid2s:'Alternative driver · ~8 min',
+    vid3t:'AroniumPOS Display Client — Full walkthrough', vid3s:'From install to first scan · Coming soon',
+    vid3coming:'AroniumPOS Display Client full demo — coming soon',
+    faq_label:'Documentation', faq_title:'Common questions', faq_sub:'Everything you need to know.',
+    cta_title:'Ready to show your<br><span class="highlight">customers the price?</span>',
+    cta_sub:'Free forever. No subscription. No account required.',
+    free_forever:'Free forever · MIT License',
+    faqs: [
+      ['No COM ports detected', 'Make sure you\'ve created a virtual COM port pair using VSPE or com0com before launching the app. Then restart the app and check the setup wizard.'],
+      ['Windows Defender blocks the download', 'Click "More info" then "Run anyway". The app is fully open source — you can inspect every line of code on GitHub.'],
+      ['Phone can\'t connect to the display', 'The PC and the phone must be on the same WiFi network. Also check that Windows Firewall allows port 3000 (TCP).'],
+      ['The app shows a black screen', 'Close the app and relaunch it. If the problem persists, right-click the shortcut → Run as administrator.'],
+      ['Does this work on Mac or Linux?', 'The app is Windows-only for now. The phone/tablet display (PWA) works on any device through a browser.'],
+      ['Can I change COM20/COM21 to other port numbers?', 'Yes. In the app\'s Config panel, you can select any COM port from the dropdown or type a port name manually.'],
+      ['The display lags behind the scanner', 'This is usually a COM port buffer issue. Try setting the buffer size to 1 in VSPE or com0com settings.'],
+      ['Can I display promotions on the customer screen?', 'Yes! Click "Config" (⚙️) in the top bar, toggle "Promo Display" ON, then drag & drop any image or video.'],
+    ]
+  },
+  fr: {
+    nav_features:'Fonctionnalités', nav_install:'Installation', nav_docs:'Docs', dl:'Télécharger',
+    badge:'Gratuit & Open Source · v1.1.5',
+    hero_h1:'Vos clients voient<br><span>chaque article, en direct.</span>',
+    hero_sub:'Un affichage client gratuit pour Aronium POS. Chaque scan apparaît immédiatement sur un second écran, téléphone ou tablette — sans aucune manipulation du client.',
+    dl_win:'Télécharger pour Windows', view_gh:'Voir sur GitHub',
+    feat_label:'Ce que ça fait', feat_title:'Tout ce que vos clients ont besoin de voir.',
+    feat_sub:'Conçu spécifiquement pour Aronium POS. Aucun abonnement, aucun superflu.',
+    f1t:'Affichage en temps réel', f1d:'Chaque article scanné apparaît avec la quantité, le prix unitaire et le total.',
+    f2t:'Panneau publicitaire', f2d:'Glissez une image ou vidéo. Plein écran entre les clients, panneau latéral pendant la commande.',
+    f3t:'Fonctionne sur téléphone', f3d:'Le client ouvre un lien — pas d\'appli. Compatible Chrome, Safari, Edge.',
+    f4t:'Produits au poids', f4d:'0,350 kg × 89,90 → calculé automatiquement.',
+    f5t:'3 langues', f5d:'Anglais, Français, Arabe. Changement en un clic dans le panneau Config.',
+    f6t:'Devise automatique', f6d:'Détectée depuis Windows — MAD, EUR, USD, GBP et plus.',
+    f7t:'Paiement & monnaie', f7d:'Affiché 5 secondes au moment du paiement, puis effacé.',
+    f8t:'Reconnexion auto', f8d:'Port COM déconnecté ? L\'app se reconnecte automatiquement toutes les 5 secondes.',
+    inst_label:'Installation', inst_title:'Prêt en 4 étapes.',
+    inst_sub:'L\'app utilise une paire de ports COM virtuels pour recevoir les données d\'Aronium.',
+    s1t:'Télécharger & installer l\'app', s1d:'Téléchargez le dernier installeur Windows et lancez-le.',
+    s2t:'Créer une paire de ports COM virtuels', s2d:'L\'app a besoin de deux ports COM virtuels reliés entre eux. Installez l\'un de ces outils gratuits :',
+    s3t:'Configurer Aronium POS', s3d:'Dites à Aronium d\'envoyer les données d\'affichage sur le premier port :',
+    s3note:'Utilisez le port gauche de la paire créée. L\'app lit depuis le port droit (ex: COM21).',
+    s4t:'Lancer & configurer l\'app', s4d:'Lancez l\'app. L\'assistant vous demande de sélectionner vos deux ports COM.',
+    s4note:'L\'adresse exacte est affichée dans le panneau Config ⚙️ en haut à droite.',
+    vspe_label:'Guide étape par étape', vspe_title:'Comment configurer VSPE', vspe_sub:'VSPE est la méthode la plus simple pour créer une paire COM virtuelle.',
+    v1t:'Télécharger & installer VSPE', v1d:'Allez sur eterlogic.com, téléchargez VSPE et installez-le. Lancez en Administrateur.',
+    v2t:'Créer un nouveau périphérique', v2d:'Cliquez "Créer un périphérique" → choisissez "NullModem" → Port A: COM20, Port B: COM21.',
+    v3t:'Démarrer la paire', v3d:'Cliquez Démarrer. COM20 et COM21 apparaissent dans le Gestionnaire de périphériques.',
+    v4t:'Démarrage automatique', v4d:'Activez "Démarrer avec Windows" pour que vos ports soient toujours prêts.',
+    vid_label:'Tutoriels vidéo', vid_title:'Voir l\'app en action', vid_sub:'Tutoriels vidéo étape par étape.',
+    vid1t:'Comment installer VSPE et créer des ports COM virtuels', vid1s:'Guide complet · ~5 min',
+    vid2t:'com0com — Installation et configuration', vid2s:'Pilote alternatif · ~8 min',
+    vid3t:'AroniumPOS Display Client — Démonstration complète', vid3s:'De l\'install au premier scan · Bientôt disponible',
+    vid3coming:'Démo complète AroniumPOS Display Client — bientôt disponible',
+    faq_label:'Documentation', faq_title:'Questions fréquentes', faq_sub:'Tout ce que vous devez savoir.',
+    cta_title:'Prêt à montrer le prix<br><span class="highlight">à vos clients ?</span>',
+    cta_sub:'Gratuit pour toujours. Sans abonnement. Sans compte.',
+    free_forever:'Gratuit pour toujours · Licence MIT',
+    faqs: [
+      ['Aucun port COM détecté', 'Assurez-vous d\'avoir créé une paire de ports COM virtuels avec VSPE ou com0com avant de lancer l\'app. Redémarrez ensuite l\'app.'],
+      ['Windows Defender bloque le téléchargement', 'Cliquez sur "Plus d\'informations" puis "Exécuter quand même". L\'app est entièrement open source.'],
+      ['Le téléphone ne se connecte pas', 'Le PC et le téléphone doivent être sur le même réseau WiFi. Vérifiez que le pare-feu Windows autorise le port 3000 (TCP).'],
+      ['L\'app affiche un écran noir', 'Fermez et relancez l\'app. Si le problème persiste, clic droit → Exécuter en tant qu\'administrateur.'],
+      ['Fonctionne-t-il sur Mac ou Linux ?', 'L\'app est uniquement Windows. L\'affichage téléphone/tablette (PWA) fonctionne sur n\'importe quel appareil.'],
+      ['Puis-je changer COM20/COM21 ?', 'Oui. Dans le panneau Config, sélectionnez un autre port depuis la liste ou tapez un nom manuellement.'],
+      ['L\'affichage est en retard sur le scanner', 'Problème de buffer COM. Réglez la taille du buffer à 1 dans les paramètres VSPE ou com0com.'],
+      ['Puis-je afficher des publicités sur l\'écran client ?', 'Oui ! Cliquez sur Config ⚙️, activez "Promo Display", puis glissez une image ou vidéo.'],
+    ]
+  },
+  ar: {
+    nav_features:'المميزات', nav_install:'التثبيت', nav_docs:'التوثيق', dl:'تحميل',
+    badge:'مجاني ومفتوح المصدر · v1.1.5',
+    hero_h1:'عملاؤك يرون<br><span>كل منتج، فورًا.</span>',
+    hero_sub:'شاشة عرض مجانية للعملاء لنظام Aronium POS. كل مسح يظهر فورًا على شاشة ثانية أو هاتف أو جهاز لوحي — دون أي إجراء من العميل.',
+    dl_win:'تحميل لنظام Windows', view_gh:'عرض على GitHub',
+    feat_label:'ما يفعله', feat_title:'كل ما يحتاج عملاؤك لرؤيته.',
+    feat_sub:'مصمم خصيصًا لنظام Aronium POS. بدون اشتراكات أو تعقيدات.',
+    f1t:'عرض الطلب مباشرة', f1d:'كل منتج يُمسح يظهر فورًا مع الكمية والسعر والإجمالي.',
+    f2t:'لوحة الإعلانات', f2d:'اسحب وأفلت صورة أو فيديو. ملء شاشة بين العملاء، لوحة جانبية أثناء الطلب.',
+    f3t:'يعمل على أي هاتف', f3d:'العميل يفتح رابطًا — بدون تثبيت أي تطبيق.',
+    f4t:'منتجات بالوزن', f4d:'0.350 كغ × 89.90 → حساب تلقائي.',
+    f5t:'3 لغات', f5d:'العربية، الفرنسية، الإنجليزية. التبديل بنقرة واحدة.',
+    f6t:'العملة تلقائية', f6d:'تُقرأ من إعدادات Windows — درهم، يورو، دولار وأكثر.',
+    f7t:'الدفع والباقي', f7d:'يُعرض لمدة 5 ثوانٍ عند الدفع ثم يُمسح تلقائيًا.',
+    f8t:'إعادة الاتصال التلقائية', f8d:'انقطع المنفذ؟ يتصل التطبيق تلقائيًا كل 5 ثوانٍ.',
+    inst_label:'التثبيت', inst_title:'جاهز في 4 خطوات.',
+    inst_sub:'يستخدم التطبيق زوج منافذ COM افتراضية لاستقبال البيانات من Aronium.',
+    s1t:'تحميل وتثبيت التطبيق', s1d:'حمّل أحدث مثبت Windows وشغّله.',
+    s2t:'إنشاء زوج منافذ COM افتراضية', s2d:'التطبيق يحتاج منفذين COM افتراضيين مربوطين معًا. ثبّت أحد الأدوات المجانية:',
+    s3t:'إعداد Aronium POS', s3d:'أخبر Aronium بإرسال بيانات شاشة العميل على المنفذ الأول:',
+    s3note:'استخدم المنفذ الأيسر من الزوج الذي أنشأته. التطبيق يقرأ من المنفذ الأيمن (مثل COM21).',
+    s4t:'تشغيل وإعداد التطبيق', s4d:'شغّل التطبيق. سيطلب منك معالج الإعداد اختيار منفذَي COM.',
+    s4note:'العنوان الدقيق يظهر داخل لوحة الإعداد ⚙️ في أعلى اليمين.',
+    vspe_label:'دليل خطوة بخطوة', vspe_title:'كيفية إعداد VSPE', vspe_sub:'VSPE هو أسهل طريقة لإنشاء زوج COM افتراضي.',
+    v1t:'تحميل وتثبيت VSPE', v1d:'اذهب إلى eterlogic.com، حمّل VSPE وثبّته. شغّله كمسؤول.',
+    v2t:'إنشاء جهاز جديد', v2d:'انقر "إنشاء جهاز جديد" → اختر "NullModem" → المنفذ A: COM20، المنفذ B: COM21.',
+    v3t:'تشغيل الزوج', v3d:'انقر Start. سيظهر COM20 وCOM21 في إدارة الأجهزة.',
+    v4t:'التشغيل التلقائي', v4d:'فعّل "البدء مع Windows" حتى تكون المنافذ جاهزة دائمًا.',
+    vid_label:'دروس فيديو', vid_title:'شاهده في العمل', vid_sub:'دروس فيديو خطوة بخطوة للإعداد والاستخدام.',
+    vid1t:'كيفية تثبيت VSPE وإنشاء منافذ COM افتراضية', vid1s:'دليل كامل · ~5 دقائق',
+    vid2t:'com0com — التثبيت والإعداد', vid2s:'برنامج تشغيل بديل · ~8 دقائق',
+    vid3t:'AroniumPOS Display Client — جولة كاملة', vid3s:'من التثبيت حتى أول مسح · قريبًا',
+    vid3coming:'عرض توضيحي كامل — قريبًا',
+    faq_label:'التوثيق', faq_title:'الأسئلة الشائعة', faq_sub:'كل ما تحتاج معرفته.',
+    cta_title:'جاهز لعرض السعر<br><span class="highlight">لعملائك؟</span>',
+    cta_sub:'مجاني للأبد. بدون اشتراك. بدون حساب.',
+    free_forever:'مجاني للأبد · رخصة MIT',
+    faqs: [
+      ['لم يتم اكتشاف أي منفذ COM', 'تأكد من إنشاء زوج منافذ COM افتراضية باستخدام VSPE أو com0com قبل تشغيل التطبيق. ثم أعد تشغيل التطبيق.'],
+      ['Windows Defender يحجب التحميل', 'انقر على "مزيد من المعلومات" ثم "تشغيل على أي حال". التطبيق مفتوح المصدر بالكامل.'],
+      ['الهاتف لا يتصل بالشاشة', 'يجب أن يكون الكمبيوتر والهاتف على نفس شبكة WiFi. تأكد من أن جدار الحماية يسمح بالمنفذ 3000.'],
+      ['التطبيق يعرض شاشة سوداء', 'أغلق التطبيق وأعد تشغيله. إذا استمرت المشكلة، شغّله كمسؤول.'],
+      ['هل يعمل على Mac أو Linux؟', 'التطبيق لنظام Windows فقط. عرض الهاتف/الجهاز اللوحي يعمل على أي جهاز عبر المتصفح.'],
+      ['هل يمكنني تغيير COM20/COM21؟', 'نعم. في لوحة Config، اختر منفذًا آخر من القائمة أو اكتب اسمًا يدويًا.'],
+      ['العرض متأخر عن الماسح', 'مشكلة في buffer المنفذ. اضبط حجم buffer على 1 في إعدادات VSPE أو com0com.'],
+      ['هل يمكنني عرض إعلانات على شاشة العميل؟', 'نعم! انقر Config ⚙️، فعّل "Promo Display"، ثم اسحب وأفلت صورة أو فيديو.'],
+    ]
+  }
+};
+
+let lang = 'en';
+
+function applyLang(l) {
+  lang = l;
+  const t = T[l] || T.en;
+  const isAr = l === 'ar';
+  document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+  document.documentElement.setAttribute('lang', l);
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (t[k] !== undefined) el.innerHTML = t[k];
+  });
+
+  // FAQ
+  buildFAQ(t.faqs || []);
+
+  // Lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
+}
+
+function buildFAQ(faqs) {
+  const list = document.getElementById('faqList');
+  list.innerHTML = faqs.map((faq, i) => `
+    <div class="faq-item" id="faq${i}">
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <span class="faq-q-text">${faq[0]}</span>
+        <span class="faq-chevron">▾</span>
+      </div>
+      <div class="faq-a">${faq[1]}</div>
+    </div>
+  `).join('');
+}
+
+function toggleFAQ(i) {
+  document.getElementById('faq'+i).classList.toggle('open');
+}
+
+// Lang switcher
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+});
+
+// Smooth scroll
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// Reveal on scroll
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold:0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Init
+applyLang('en');
+</script>
+<script src="https://player.vimeo.com/api/player.js">
+/* ── Direct download link via GitHub API ── */
+async function updateDownloadLink() {
+  try {
+    const res = await fetch('https://api.github.com/repos/Hamidlegardien/posdisplayclientAronium/releases/latest', {
+      headers: { Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const exe = (data.assets || []).find(a => a.name.endsWith('.exe') && a.name.includes('Setup'));
+    if (!exe) return;
+    const url = exe.browser_download_url;
+    // Update all download buttons to direct .exe link
+    document.querySelectorAll('a[href*="releases/latest"]').forEach(a => {
+      a.href = url;
+      a.setAttribute('download', exe.name);
+    });
+    // Update version badge
+    const badge = document.querySelector('.version-badge');
+    if (badge && data.tag_name) badge.textContent = data.tag_name + ' · Windows 10/11';
+  } catch(e) { /* silently fail, keep fallback links */ }
+}
+updateDownloadLink();
+</script>
+</body>
+</html>
