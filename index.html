@@ -295,29 +295,54 @@ nav {
    VIDEO SECTION
 ═══════════════════════════════════════════ */
 .videos-section { max-width:1100px; margin:0 auto; padding:80px 24px; position:relative; z-index:1; }
-.videos-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
+.videos-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:20px;
+  align-items:start;
+}
 .video-card {
-  background:var(--bg2); border:1px solid var(--border);
-  border-radius:16px; overflow:hidden; transition:all .25s;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  position:relative;
 }
-.video-card:hover { transform:translateY(-4px); box-shadow:0 16px 50px rgba(0,0,0,.5); border-color:var(--border-hi); }
+.video-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:0; transition:opacity .3s; z-index:1;
+}
+.video-card:hover { transform:translateY(-5px); box-shadow:0 20px 60px rgba(0,0,0,.6); border-color:var(--border-hi); }
+.video-card:hover::before { opacity:1; }
+
+/* Uniform 16:9 container — clips both videos to same height */
 .video-thumb {
-  width:100%; background:var(--bg3);
-  display:block; position:relative; overflow:hidden;
+  width:100%;
+  position:relative;
+  padding-top:56.25%; /* always 16:9 */
+  background:var(--bg3);
+  overflow:hidden;
 }
-.video-thumb-placeholder {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:10px; padding:20px; text-align:center;
+.video-thumb iframe {
+  position:absolute;
+  top:50%; left:0;
+  width:100%; height:100%;
+  border:none;
+  transform:translateY(-50%);
 }
-.play-btn {
-  width:52px; height:52px; border-radius:50%;
-  background:var(--accent); display:flex; align-items:center; justify-content:center;
-  box-shadow:0 0 20px var(--acc-glow);
-  font-size:18px; padding-left:3px;
+
+.video-info {
+  padding:18px 20px 20px;
+  border-top:1px solid var(--border);
 }
-.video-info { padding:16px 18px; }
-.video-title { font-size:13.5px; font-weight:700; margin-bottom:4px; }
-.video-sub   { font-size:11.5px; color:var(--text2); }
+.video-num {
+  font-size:10px; font-weight:700; letter-spacing:2px;
+  text-transform:uppercase; color:var(--accent); margin-bottom:8px;
+}
+.video-title { font-size:14px; font-weight:700; margin-bottom:5px; line-height:1.4; }
+.video-sub   { font-size:12px; color:var(--text2); line-height:1.5; }
 
 /* ═══════════════════════════════════════════
    DOCS / FAQ
@@ -680,41 +705,37 @@ footer a:hover { color:var(--accent); }
   <div class="section-label" data-i18n="vid_label">Video guides</div>
   <h2 class="section-title" data-i18n="vid_title">Watch it in action</h2>
   <p class="section-sub" style="margin-bottom:36px" data-i18n="vid_sub">Step-by-step video tutorials for setup and usage.</p>
-  <div class="videos-grid" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))">
+  <div class="videos-grid">
 
-    <!-- VSPE setup video -->
     <div class="video-card reveal">
-      <div class="video-thumb" style="position:relative;padding:0;height:0;padding-top:56.25%;overflow:hidden">
+      <div class="video-thumb">
         <iframe
           src="https://player.vimeo.com/video/1206956922?badge=0&autopause=0&player_id=0&app_id=58479"
-          frameborder="0"
           allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
           referrerpolicy="strict-origin-when-cross-origin"
-          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none"
           title="VSPE CONFIG ARONIUM VFD">
         </iframe>
       </div>
       <div class="video-info">
+        <div class="video-num">📹 Guide 01</div>
         <div class="video-title" data-i18n="vid1t">VSPE — Virtual COM port configuration</div>
         <div class="video-sub" data-i18n="vid1s">How to set up VSPE for AroniumPOS VFD display</div>
       </div>
     </div>
 
-    <!-- Aronium setup video -->
     <div class="video-card reveal">
-      <div class="video-thumb" style="position:relative;padding:0;height:0;padding-top:75%;overflow:hidden">
+      <div class="video-thumb">
         <iframe
           src="https://player.vimeo.com/video/1206956903?badge=0&autopause=0&player_id=0&app_id=58479"
-          frameborder="0"
           allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
           referrerpolicy="strict-origin-when-cross-origin"
-          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none"
           title="Aronium Configuration">
         </iframe>
       </div>
       <div class="video-info">
+        <div class="video-num">📹 Guide 02</div>
         <div class="video-title" data-i18n="vid2t">Aronium POS — Customer display &amp; VFD setup</div>
-        <div class="video-sub" data-i18n="vid2s">Configure Aronium to send data to the display</div>
+        <div class="video-sub" data-i18n="vid2s">Step-by-step Aronium configuration guide</div>
       </div>
     </div>
 
