@@ -427,7 +427,7 @@ footer a:hover { color:var(--accent); }
       <button class="lang-btn" data-lang="fr">FR</button>
       <button class="lang-btn" data-lang="ar">AR</button>
     </div>
-    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="nav-dl" target="_blank">
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/download/v1.1.5/AroniumPOS-Display-Client-Setup-1.1.5.exe" class="nav-dl" target="_blank">
       ⬇ <span data-i18n="dl">Download</span>
     </a>
   </div>
@@ -442,7 +442,7 @@ footer a:hover { color:var(--accent); }
   <h1 data-i18n="hero_h1">Your customers see<br><span>every item, live.</span></h1>
   <p class="hero-sub" data-i18n="hero_sub">A free customer-facing display for Aronium POS. Every scan shows up instantly on a second screen, phone, or tablet — no setup for the customer.</p>
   <div class="hero-btns">
-    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="btn-dl" target="_blank">
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/download/v1.1.5/AroniumPOS-Display-Client-Setup-1.1.5.exe" class="btn-dl" target="_blank">
       ⬇ <span data-i18n="dl_win">Download for Windows</span>
     </a>
     <a href="https://github.com/Hamidlegardien/posdisplayclientAronium" class="btn-gh" target="_blank">
@@ -556,7 +556,7 @@ footer a:hover { color:var(--accent); }
       <div class="step-num">1</div>
       <div class="step-title" data-i18n="s1t">Download & install the app</div>
       <div class="step-desc" data-i18n="s1d">Download the latest Windows installer and run it. No admin required — the app installs in your user folder.</div>
-      <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="tool-card" target="_blank" style="text-decoration:none">
+      <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/download/v1.1.5/AroniumPOS-Display-Client-Setup-1.1.5.exe" class="tool-card" target="_blank" style="text-decoration:none">
         <div class="tool-icon">📦</div>
         <div class="tool-info">
           <div class="tool-name">AroniumPOS-Display-Client-Setup.exe</div>
@@ -713,7 +713,7 @@ footer a:hover { color:var(--accent); }
         </iframe>
       </div>
       <div class="video-info">
-        <div class="video-title" data-i18n="vid2t">Aronium POS — Customer display setup</div>
+        <div class="video-title" data-i18n="vid2t">Aronium POS — Customer display &amp; VFD setup</div>
         <div class="video-sub" data-i18n="vid2s">Configure Aronium to send data to the display</div>
       </div>
     </div>
@@ -740,7 +740,7 @@ footer a:hover { color:var(--accent); }
     <div class="version-badge">v1.1.5 · Windows 10/11</div>
     <h2 class="cta-title" data-i18n="cta_title">Ready to show your<br><span class="highlight">customers the price?</span></h2>
     <p class="cta-sub" data-i18n="cta_sub">Free forever. No subscription. No account required.</p>
-    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/latest" class="btn-dl" target="_blank" style="display:inline-flex">
+    <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/releases/download/v1.1.5/AroniumPOS-Display-Client-Setup-1.1.5.exe" class="btn-dl" target="_blank" style="display:inline-flex">
       ⬇ <span data-i18n="dl_win">Download for Windows</span>
     </a>
     <div style="margin-top:16px">
@@ -763,7 +763,7 @@ footer a:hover { color:var(--accent); }
     <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/issues" target="_blank">Report a bug</a>
     <a href="https://github.com/Hamidlegardien/posdisplayclientAronium/blob/main/LICENSE" target="_blank">MIT License</a>
   </div>
-  <span>© 2025 Hamidlegardien</span>
+  <span>© 2026 Hamidlegardien</span>
 </footer>
 
 <!-- ══════════════════════════════════════════════
@@ -979,7 +979,8 @@ applyLang('en');
 </script>
 <script src="https://player.vimeo.com/api/player.js">
 /* ── Direct download link via GitHub API ── */
-async function updateDownloadLink() {
+async function updateDownloadLink() { return; // direct link already set
+  if(false){
   try {
     const res = await fetch('https://api.github.com/repos/Hamidlegardien/posdisplayclientAronium/releases/latest', {
       headers: { Accept: 'application/vnd.github.v3+json' }
